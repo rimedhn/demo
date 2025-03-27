@@ -139,7 +139,8 @@
     <div id="thermal-pos">
       <div class="label">
         <img src="https://github.com/rimedhn/gestiondenumeros/blob/main/logonumbers.jpeg?raw=true" alt="Mi imagen" class="mi-imagen" /><br />
-        <b>COMPROBANTE</b><br />               
+        <span id="empresa"></span></b><br />
+        <span>ARQUEO DE CAJA</span></b><br />               
       </div>
 
       <div align="center">--------------------------------------------------------</div>
@@ -152,12 +153,16 @@
           <td class="informasi" style="width: 70%;" id="fecha"></td>
         </tr>
         <tr>
-          <td class="informasi" style="width: 30%;">CLIENTE:</td>
-          <td class="informasi" style="width: 70%;" id="cliente"></td>
+          <td class="informasi" style="width: 30%;">CAJA:</td>
+          <td class="informasi" style="width: 70%;" id="caja"></td>
         </tr>
         <tr>
           <td class="informasi" style="width: 30%;">CAJERO:</td>
           <td class="informasi" style="width: 70%;" id="cajero"></td>
+        </tr>
+        <tr>
+          <td class="informasi" style="width: 30%;">TIPO ARQUEO:</td>
+          <td class="informasi" style="width: 70%;" id="tipoarqueo"></td>
         </tr>
       </table>
 
@@ -168,14 +173,11 @@
       <table>
         <tr class="listitem">
           <td>
-            <h2>NUMERO</h2>
+            <h2>MEDIO DE PAGO</h2>
           </td>
           <td>
             <h2>MONTO</h2>
-          </td>
-          <td>
-            <h2>JUEGA</h2>
-          </td>          
+          </td>         
         </tr>
       </table>
       <div align="center">--------------------------------------------------------</div>
@@ -187,17 +189,25 @@
       <div align="center">--------------------------------------------------------</div>
       <table>
         <tr>
-          <td class="detail">TOTAL</td>
-          <td class="detail1">L<span id="total"></span></td>
+          <td class="detail">TOTAL EFECTIVO</td>
+          <td class="detail1">L<span id="totalefectivo"></span></td>
         </tr>
         <tr>
-          <td class="detail">RECIBIDO</td>
-          <td class="detail1">L<span id="recibido"></span></td>
-        </tr> 
+          <td class="detail">TOTAL TARJETAS</td>
+          <td class="detail1">L<span id="totaltarjetas"></span></td>
+        </tr>
+                <tr>
+          <td class="detail">TOTAL DEPOSITOS</td>
+          <td class="detail1">L<span id="totaldepositos"></span></td>
+        </tr>
+                <tr>
+          <td class="detail">TOTAL TRANSFERENCIAS</td>
+          <td class="detail1">L<span id="totaltransferencias"></span></td>
+        </tr>
         <tr>
-          <td class="detail">CAMBIO</td>
-          <td class="detail1">L<span id="cambio"></span></td>
-        </tr> 
+          <td class="detail">TOTAL ARQUEO</td>
+          <td class="detail1">L<span id="totalarqueo"></span></td>
+        </tr>
       </table>
 
       <div align="center">--------------------------------------------------------</div>
@@ -224,18 +234,20 @@
       }
 
       // Populate the receipt with data from URL parameters
-      setTextContent("referencia", getUrlParameter("referencia"));
+      setTextContent("empresa", getUrlParameter("empresa"));
       setTextContent("fecha", getUrlParameter("fecha"));
-      setTextContent("cliente", getUrlParameter("cliente"));
+      setTextContent("caja", getUrlParameter("caja"));
       setTextContent("cajero", getUrlParameter("cajero"));
-      setTextContent("total", getUrlParameter("total"));
+      setTextContent("tipoarqueo", getUrlParameter("tipoarqueo"));
       setTextContent("folio", getUrlParameter("folio"));
-      setTextContent("recibido", getUrlParameter("recibido"));
-      setTextContent("cambio", getUrlParameter("cambio"));
+      setTextContent("totaltransferencias", getUrlParameter("totaltransferencias"));
+      setTextContent("totaldepositos", getUrlParameter("totaldepositos"));
+      setTextContent("totaltarjetas", getUrlParameter("totaltarjetas"));
+      setTextContent("totalefectivo", getUrlParameter("totalefectivo"));
+      setTextContent("totalarqueo", getUrlParameter("totalarqueo"));
       // Populate product table
       var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
-      var prices = getUrlParameter("price").split(",");
       var amounts = getUrlParameter("amounts").split(",");
 
       var productTable = document.getElementById("productTable");
@@ -250,7 +262,6 @@
         var detailsRow = productTable.insertRow();
         detailsRow.innerHTML = `
         <td class="qty">${quantitys[i]}</td>
-        <td class="Price">${prices[i]}</td>
         <td class="Amount">${amounts[i]}</td>
     `;
 
