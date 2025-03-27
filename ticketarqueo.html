@@ -137,7 +137,7 @@
       </div>
 
       <div align="center">--------------------------------------------------------</div>
-      <div   align="center"><b>DATOS GENERALES <span id="referencia"></span></b></div>
+      <div   align="center"><b>DATOS GENERALES <span></span></b></div>
       <div align="center">--------------------------------------------------------</div>
 
       <table>
@@ -180,23 +180,7 @@
       </table>
 
       <div align="center">--------------------------------------------------------</div>
-      <table>
-        <tr>
-          <td class="detail">EFECTIVO</td>
-          <td class="detail1">L<span id="totalefectivo"></span></td>
-        </tr>
-        <tr>
-          <td class="detail">TARJETAS</td>
-          <td class="detail1">L<span id="totaltarjetas"></span></td>
-        </tr>
-                <tr>
-          <td class="detail">DEPOSITOS</td>
-          <td class="detail1">L<span id="totaldepositos"></span></td>
-        </tr>
-                <tr>
-          <td class="detail">TRANSFERENCIAS</td>
-          <td class="detail1">L<span id="totaltransferencias"></span></td>
-        </tr>
+      <table>        
         <tr>
           <td class="detail">TOTAL ARQUEO</td>
           <td class="detail1">L<span id="totalarqueo"></span></td>
@@ -233,12 +217,7 @@
       setTextContent("cajero", getUrlParameter("cajero"));
       setTextContent("tipoarqueo", getUrlParameter("tipoarqueo"));
       setTextContent("folio", getUrlParameter("folio"));
-      setTextContent("totaltransferencias", getUrlParameter("totaltransferencias"));
-      setTextContent("totaldepositos", getUrlParameter("totaldepositos"));
-      setTextContent("totaltarjetas", getUrlParameter("totaltarjetas"));
-      setTextContent("totalefectivo", getUrlParameter("totalefectivo"));
       setTextContent("totalarqueo", getUrlParameter("totalarqueo"));
-      setTextContent("referencia", getUrlParameter("referencia"));
       // Populate product table
       var descriptions = getUrlParameter("descriptions").split(",");
       var quantitys = getUrlParameter("quantitys").split(",");
