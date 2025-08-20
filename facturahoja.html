@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FACTURA</title>
     <link rel="icon" href="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true" type="image/x-icon">
     <style type="text/css">
       #letter-size {
@@ -101,23 +98,46 @@
       }
 
       .mi-imagen {
-        width: 100px;
+        width: 163px;
         height: 100px;
         padding: auto;
         align: center;
         vertical-align: center;
       }
+
+/* Estilos para el contenedor del encabezado */
+.invoice-header {
+    width: 100%; /* Asegura que el encabezado ocupe todo el ancho de la página */
+    padding: 0; /* Elimina cualquier padding interno del encabezado */
+    margin: 0; /* Elimina cualquier margen externo del encabezado */
+    overflow: hidden; /* Importante para contener elementos flotantes si los hubiera */
+    /* Puedes añadir un color de fondo si quieres, por ejemplo: background-color: #f0f0f0; */
+}
+
+/* --- */
+
+/* Estilos para la imagen del logo dentro del encabezado */
+.header-logo {
+    display: block; /* Elimina espacios extra que puedan aparecer con imágenes */
+    width: 100%; /* ¡Esto es clave! Hace que la imagen ocupe el 100% del ancho de su contenedor (.invoice-header) */
+    height: auto; /* Mantiene la proporción original de la imagen. La altura se ajustará automáticamente. */
+    /* Si deseas que tenga una altura fija (como tus 84px originales), puedes poner:
+    height: 84px;
+    object-fit: contain; /* o cover, dependiendo de cómo quieras que se ajuste si el ancho no es exacto */
+    margin: 0 auto; /* Centra la imagen si el contenedor es más grande que ella, aunque con width: 100% no será necesario */
+}
+      
     </style>
   </head>
   <body>
+    <header class="invoice-header">
+        <img src="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true" alt="Logo" class="header-logo">
+        </header>
     <div class="label">    
       <table style="width: 100%; border-collapse: collapse;
-    border: none;" class="sin-bordes">
+    border: none; margin-top: 5px;" class="sin-bordes">
         <tr>
-          <th colspan="3" style="width: 10%">
-            <img src="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true" alt="Mi imagen" class="mi-imagen" />
-          </th>
-          <th colspan="9" style="width: 90%; text-align: left">
+          <th colspan="12" style="width: 100%; text-align: left">
             <b style="font-size: 30px" id="empresa"></b><br />
             <b>RTN: <span id="rtn"></span></b><br />
             <b>Direccion: <span id="direccion"></span></b><br />
@@ -170,9 +190,9 @@
           <td style="text-align: center; class="detalleproducts" colspan="6">Detalle</td>
         </tr>
         <tr>
-          <td  style="text-align: center; width: 10%">
+          <td  style="text-align: center; width: 20%">
             <h2 style="font-size: 4mm; text-align: Center; line-height: 0.1">
-              Cant
+              Codigo
             </h2>
           </td>
           <td  style="text-align: left; width: 40%">
@@ -180,24 +200,19 @@
               Descripcion
             </h2>
           </td>
-          <td  style="text-align: right; width: 11%">
+          <td  style="text-align: right; width: 10%">
             <h2 style="font-size: 4mm; text-align: Center; line-height: 0.1">
-              Precio
+              Cantidad
             </h2>
           </td>
-          <td  style="text-align: right; width: 14%">
+          <td  style="text-align: right; width: 15%">
             <h2 style="font-size: 4mm; text-align: Center; line-height: 0.1">
-              Subt.
+              Precio U.
             </h2>
           </td>
-          <td  style="text-align: right; width: 11%">
+          <td  style="text-align: right; width: 15%">
             <h2 style="font-size: 4mm; text-align: Center; line-height: 0.1">
-              Isv
-            </h2>
-          </td>
-          <td  style="text-align: right; width: 14%">
-            <h2 style="font-size: 4mm; text-align: Center; line-height: 0.1">
-              Monto
+              Importe L
             </h2>
           </td>
         </tr>
@@ -319,9 +334,9 @@
             "
           >
             <b>Original: cliente, Copia: emisor</b>
-            <br /><span>www.rmposhn.com</span><br />
-            <span>indime.hn@gmail.com</span>
-            <span>(+504) 9359-3126</span>
+            <br /><span></span><br />
+            <span></span>
+            <span></span>
           </td>
           <td
             colspan="3"
@@ -401,22 +416,20 @@
           getQueryParam("Folio_1");
 
         // Fill product list
+        var codeproduct = getQueryParam("codeproduct").split(",");
         var descriptions = getQueryParam("descriptions").split(",");
         var quantitys = getQueryParam("quantitys").split(",");
         var price = getQueryParam("price").split(",");
-        var subtproducto = getQueryParam("subtproducto").split(",");
-        var isvproducto = getQueryParam("isvproducto").split(",");
         var amounts = getQueryParam("amounts").split(",");
 
         var productList = document.getElementById("productList");
         for (var i = 0; i < descriptions.length; i++) {
           var row = productList.insertRow();
-          row.insertCell(0).textContent = quantitys[i];
+          row.insertCell(0).textContent = codeproduct[i];
           row.insertCell(1).textContent = descriptions[i];
-          row.insertCell(2).textContent = price[i];
-          row.insertCell(3).textContent = subtproducto[i];
-          row.insertCell(4).textContent = isvproducto[i];
-          row.insertCell(5).textContent = amounts[i];
+          row.insertCell(2).textContent = quantitys[i];
+          row.insertCell(3).textContent = price[i];
+          row.insertCell(4).textContent = amounts[i];
         }
 
         // Convert amount to words (simplified version)
