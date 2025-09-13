@@ -1,5 +1,5 @@
 // Suponiendo que tienes una variable ventaActual ya con los datos de la venta
-const URL_APPSCRIPT_FACTURA = "https://script.google.com/macros/s/AKfycbwMoMFXvG-yaknknx2yH_Uq-V19Ydxwe5Y-qGjuLV-0ZlnoB8qYteFsAtvTD8L3gHl1/exec";
+const URL_APPSCRIPT_FACTURA = "https://script.google.com/macros/s/AKfycbyg1xFqs3sfeNIewBOCpoin20Bjoe19w9jqvByZ7ew7CqdILEYV2PDY50Of1GBniOLN/exec";
 
 function mostrarBotonFacturar(venta) {
   const btnFacturar = document.getElementById('btn-facturar');
