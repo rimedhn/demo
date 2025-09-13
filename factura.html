@@ -25,11 +25,12 @@
     <h2>Facturación de Venta</h2>
     <div class="field">
       <label for="no-venta">No Venta:</label>
-      <input type="text" id="no-venta" placeholder="Ingrese el número de venta" />
+      <input type="text" id="no-venta" readonly />
     </div>
     <div class="field">
       <label for="caja">Caja:</label>
-      <input type="text" id="caja" placeholder="Ingrese el nombre de la caja" />
+      <input type="text" id="caja" placeholder="Caja de la venta" />
+      <small style="color:#666;">Puedes modificar la caja antes de facturar si es necesario.</small>
     </div>
     <button id="btn-facturar" disabled>Facturar</button>
     <div id="factura-info" class="hide"></div>
@@ -37,9 +38,9 @@
   </div>
   <script>
     // CONFIGURA LA URL DE TU Apps Script
-    const URL_APPSCRIPT_FACTURA = "https://script.google.com/macros/s/AKfycbwZ3jfUvN1zYwGpCnnOEtltrlhNN3tcxebm3Nv9J3-Y_AtCsQ_3RNMzn4KhsQ6y3hAo/exec";
+    const URL_APPSCRIPT_FACTURA = "https://script.google.com/macros/s/AKfycbyA2TN2koUcyYf8TxC6H03S9_YiNd2Y9UGRyywJ4tCF634WGWoAfxlk3GXZOenpdyaU/exec";
     // Cambia por tu URL Opensheet si quieres mostrar info de la venta
-    const URL_OPENSHEET_VENTAS = "https://opensheet.elk.sh/1q9z92BMUAxjsiO5AnACeur6wJhVpfIUkqT62erIUUOA/Ventas";
+    const URL_OPENSHEET_VENTAS = "https://opensheet.elk.sh/1VPdlCZXcHfOGCfdnarxrfyKTNHDQQU9E_ISW_qj66YU/Ventas";
 
     const btnFacturar = document.getElementById('btn-facturar');
     const noVentaInput = document.getElementById('no-venta');
@@ -47,32 +48,57 @@
     const facturaInfo = document.getElementById('factura-info');
     const errorMsg = document.getElementById('error-msg');
 
+    // Obtén el parámetro No Venta de la URL
+    function getQueryParam(param) {
+      var urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // Inicializa el flujo con No Venta en la URL
+    async function init() {
+      const noVentaParam = getQueryParam('no_venta');
+      if (noVentaParam) {
+        noVentaInput.value = noVentaParam;
+        await checkVentaFactura();
+      } else {
+        errorMsg.textContent = "No Venta no encontrado en la URL.";
+        errorMsg.classList.remove('hide');
+        btnFacturar.disabled = true;
+      }
+    }
+
     // Habilita el botón sólo si ambos campos tienen valor
     function checkFields() {
       btnFacturar.disabled = !(noVentaInput.value.trim() && cajaInput.value.trim());
       facturaInfo.classList.add('hide');
       errorMsg.classList.add('hide');
     }
-    noVentaInput.addEventListener('input', checkFields);
     cajaInput.addEventListener('input', checkFields);
 
     // Consulta si la venta ya tiene factura y muestra el botón sólo si NO la tiene
     async function checkVentaFactura() {
       const noVenta = noVentaInput.value.trim();
-      const caja = cajaInput.value.trim();
-      btnFacturar.disabled = !(noVenta && caja);
       facturaInfo.classList.add('hide');
       errorMsg.classList.add('hide');
-      if (!noVenta || !caja) return;
+      btnFacturar.disabled = true;
+      if (!noVenta) return;
       try {
         const resp = await fetch(URL_OPENSHEET_VENTAS);
         const ventas = await resp.json();
-        const venta = ventas.find(v => v["No Venta"] === noVenta && v["Caja"] === caja);
+        const venta = ventas.find(v => v["No Venta"] === noVenta);
         if (!venta) {
-          errorMsg.textContent = "Venta no encontrada con ese No Venta y Caja.";
+          errorMsg.textContent = "Venta no encontrada con ese No Venta.";
           errorMsg.classList.remove('hide');
           btnFacturar.disabled = true;
           return;
+        }
+        // Si la caja existe en la venta, precárgala en el campo
+        if (venta["Caja"] && !cajaInput.value) {
+          cajaInput.value = venta["Caja"];
+        }
+        if (!cajaInput.value) {
+          errorMsg.textContent = "Caja no asignada a la venta, ingrésela.";
+          errorMsg.classList.remove('hide');
         }
         if (venta["Factura"]) {
           errorMsg.textContent = "La venta ya tiene factura asignada: " + venta["Factura"];
@@ -80,7 +106,7 @@
           btnFacturar.disabled = true;
           showFacturaInfo(venta);
         } else {
-          btnFacturar.disabled = false;
+          btnFacturar.disabled = !(noVenta && cajaInput.value.trim());
           errorMsg.classList.add('hide');
         }
       } catch (err) {
@@ -89,8 +115,7 @@
         btnFacturar.disabled = true;
       }
     }
-    noVentaInput.addEventListener('blur', checkVentaFactura);
-    cajaInput.addEventListener('blur', checkVentaFactura);
+    cajaInput.addEventListener('blur', checkFields);
 
     // Botón de facturar
     btnFacturar.onclick = async function() {
@@ -159,6 +184,8 @@
       `;
       btnFacturar.style.display = 'none';
     }
+
+    window.onload = init;
   </script>
 </body>
 </html>
