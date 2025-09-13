@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Facturación de Venta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f8f8; margin:0; padding:0;}
+    .container { max-width: 650px; margin: 22px auto; background: #fff; padding: 32px 24px 24px 24px; border-radius: 12px; box-shadow:0 2px 12px #ccc;}
+    h2 { margin-bottom: 14px; font-size: 1.8em;}
+    .field { margin-bottom: 12px;}
+    label { display: block; font-weight: bold;}
+    input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; border-radius: 5px; border: 1px solid #aaa;}
+    #btn-facturar { margin-top: 14px; background: #1a6; color: #fff; font-weight: bold; padding: 10px 24px; border: none; border-radius: 5px; font-size: 1.2em; cursor:pointer;}
+    #btn-facturar:disabled { background: #bbb; cursor: not-allowed;}
+    #factura-info { margin-top: 24px; border-top: 1px solid #ddd; padding-top: 18px;}
+    .info-row { margin-bottom: 8px; font-size: 1.1em;}
+    .success { color: #1a6; font-weight: bold;}
+    .error { color: #a11; font-weight: bold;}
+    .hide { display: none;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Facturación de Venta</h2>
+    <div class="field">
+      <label for="no-venta">No Venta:</label>
+      <input type="text" id="no-venta" placeholder="Ingrese el número de venta" />
+    </div>
+    <div class="field">
+      <label for="caja">Caja:</label>
+      <input type="text" id="caja" placeholder="Ingrese el nombre de la caja" />
+    </div>
+    <button id="btn-facturar" disabled>Facturar</button>
+    <div id="factura-info" class="hide"></div>
+    <div id="error-msg" class="error hide"></div>
+  </div>
+  <script>
+    // CONFIGURA LA URL DE TU Apps Script
+    const URL_APPSCRIPT_FACTURA = "https://script.google.com/macros/s/AKfycbwZ3jfUvN1zYwGpCnnOEtltrlhNN3tcxebm3Nv9J3-Y_AtCsQ_3RNMzn4KhsQ6y3hAo/exec";
+    // Cambia por tu URL Opensheet si quieres mostrar info de la venta
+    const URL_OPENSHEET_VENTAS = "https://opensheet.elk.sh/1q9z92BMUAxjsiO5AnACeur6wJhVpfIUkqT62erIUUOA/Ventas";
+
+    const btnFacturar = document.getElementById('btn-facturar');
+    const noVentaInput = document.getElementById('no-venta');
+    const cajaInput = document.getElementById('caja');
+    const facturaInfo = document.getElementById('factura-info');
+    const errorMsg = document.getElementById('error-msg');
+
+    // Habilita el botón sólo si ambos campos tienen valor
+    function checkFields() {
+      btnFacturar.disabled = !(noVentaInput.value.trim() && cajaInput.value.trim());
+      facturaInfo.classList.add('hide');
+      errorMsg.classList.add('hide');
+    }
+    noVentaInput.addEventListener('input', checkFields);
+    cajaInput.addEventListener('input', checkFields);
+
+    // Consulta si la venta ya tiene factura y muestra el botón sólo si NO la tiene
+    async function checkVentaFactura() {
+      const noVenta = noVentaInput.value.trim();
+      const caja = cajaInput.value.trim();
+      btnFacturar.disabled = !(noVenta && caja);
+      facturaInfo.classList.add('hide');
+      errorMsg.classList.add('hide');
+      if (!noVenta || !caja) return;
+      try {
+        const resp = await fetch(URL_OPENSHEET_VENTAS);
+        const ventas = await resp.json();
+        const venta = ventas.find(v => v["No Venta"] === noVenta && v["Caja"] === caja);
+        if (!venta) {
+          errorMsg.textContent = "Venta no encontrada con ese No Venta y Caja.";
+          errorMsg.classList.remove('hide');
+          btnFacturar.disabled = true;
+          return;
+        }
+        if (venta["Factura"]) {
+          errorMsg.textContent = "La venta ya tiene factura asignada: " + venta["Factura"];
+          errorMsg.classList.remove('hide');
+          btnFacturar.disabled = true;
+          showFacturaInfo(venta);
+        } else {
+          btnFacturar.disabled = false;
+          errorMsg.classList.add('hide');
+        }
+      } catch (err) {
+        errorMsg.textContent = "Error consultando la venta: " + err;
+        errorMsg.classList.remove('hide');
+        btnFacturar.disabled = true;
+      }
+    }
+    noVentaInput.addEventListener('blur', checkVentaFactura);
+    cajaInput.addEventListener('blur', checkVentaFactura);
+
+    // Botón de facturar
+    btnFacturar.onclick = async function() {
+      btnFacturar.disabled = true;
+      facturaInfo.classList.add('hide');
+      errorMsg.classList.add('hide');
+      const noVenta = noVentaInput.value.trim();
+      const caja = cajaInput.value.trim();
+      if (!noVenta || !caja) {
+        errorMsg.textContent = "Ingrese No Venta y Caja.";
+        errorMsg.classList.remove('hide');
+        return;
+      }
+      btnFacturar.textContent = "Facturando...";
+      try {
+        const payload = {
+          TipoRegistro: 'FacturarVenta',
+          NoVenta: noVenta,
+          Caja: caja
+        };
+        const resp = await fetch(URL_APPSCRIPT_FACTURA, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        if (data.ok) {
+          facturaInfo.classList.remove('hide');
+          facturaInfo.innerHTML = `
+            <div class="success">Factura generada correctamente.</div>
+            <div class="info-row"><b>Número de Factura:</b> ${data.Factura}</div>
+            <div class="info-row"><b>CAI:</b> ${data.CAI}</div>
+            <div class="info-row"><b>Vencimiento:</b> ${data.Vencimiento}</div>
+            <div class="info-row"><b>Rango inicial:</b> ${data.RangoInicial}</div>
+            <div class="info-row"><b>Rango final:</b> ${data.RangoFinal}</div>
+          `;
+          btnFacturar.style.display = 'none';
+          // Opcional: abrir impresión/factura
+          setTimeout(() => {
+            window.open(`factura.html?no_venta=${noVenta}`, "_blank");
+          }, 1200);
+        } else {
+          errorMsg.textContent = data.message;
+          errorMsg.classList.remove('hide');
+          btnFacturar.textContent = "Facturar";
+          btnFacturar.disabled = false;
+        }
+      } catch (err) {
+        errorMsg.textContent = "Error al facturar: " + err;
+        errorMsg.classList.remove('hide');
+        btnFacturar.textContent = "Facturar";
+        btnFacturar.disabled = false;
+      }
+    };
+
+    // Muestra info de factura si ya existe
+    function showFacturaInfo(venta) {
+      facturaInfo.classList.remove('hide');
+      facturaInfo.innerHTML = `
+        <div class="success">Factura ya asignada.</div>
+        <div class="info-row"><b>Número de Factura:</b> ${venta["Factura"]}</div>
+        <div class="info-row"><b>CAI:</b> ${venta["CAI"] || ""}</div>
+        <div class="info-row"><b>Vencimiento:</b> ${venta["Vencimiento"] || ""}</div>
+        <div class="info-row"><b>Rango inicial:</b> ${venta["Rango inicial"] || ""}</div>
+        <div class="info-row"><b>Rango final:</b> ${venta["Rango final"] || ""}</div>
+      `;
+      btnFacturar.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
