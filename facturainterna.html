@@ -257,14 +257,14 @@
         document.getElementById("rtncliente").textContent = v["RTN Cliente"] || v["RTN"] || "";
         document.getElementById("telefonocliente").textContent = v["TelefonoCliente"] || "";
         document.getElementById("direccioncliente").textContent = v["DireccionCliente"] || v["Direccion"] || "";
-        document.getElementById("vendedor").textContent = v["Vendedor"] || "";
+        document.getElementById("vendedor").textContent = v["NombreVendedor"] || "";
 
         document.getElementById("factura").textContent = v["Factura"] || v["No Venta"] || "";
         document.getElementById("date").textContent = v["Fecha hora"] || "";
         document.getElementById("cai").textContent = v["CAI"] || "";
         document.getElementById("rango").textContent = (v["Rango inicial"]||"") + " - " + (v["Rango final"]||"");
         document.getElementById("limite").textContent = v["Vencimiento"] || "";
-        document.getElementById("cajero").textContent = v["Caja"] || "";
+        document.getElementById("cajero").textContent = v["NombreCajero"] || "";
 
         // Exonerado y condiciones de pago (ajusta según campos sheet)
         document.getElementById("ocexe").textContent = v["Orden Exenta"] || "";
