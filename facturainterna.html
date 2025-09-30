@@ -244,23 +244,23 @@
         const productos = data.productos;
 
         // Encabezado empresa (ajusta estos campos según tu sheet)
-        document.getElementById("empresa").textContent = v["Empresa"] || "INVERSIONES RDB S DE R. L";
-        document.getElementById("razon").textContent = v["Razon Social"] || "";
-        document.getElementById("rtn").textContent = v["RTN Empresa"] || v["RTN"] || "";
-        document.getElementById("direccion").textContent = v["Direccion Empresa"] || v["Direccion"] || "";
-        document.getElementById("telefono").textContent = v["Telefono Empresa"] || v["Telefono"] || "";
-        document.getElementById("email-content").textContent = v["Email Empresa"] || v["Email"] || "";
+        document.getElementById("empresa").textContent = v["Empresa"] || "DEMO";
+        document.getElementById("razon").textContent = v["Razon Social"] || "DEMO EMPRESA S DE R. L";
+        document.getElementById("rtn").textContent = v["RTN Empresa"] || v["RTN Negocio"] || "0000-0000-00000";
+        document.getElementById("direccion").textContent = v["Direccion Empresa"] || v["DireccionEmpresa"] || "DIRECCION DEL NEGOCIO";
+        document.getElementById("telefono").textContent = v["Telefono Empresa"] || v["TelefonoEmpresa"] || "+504 0000-0000";
+        document.getElementById("email-content").textContent = v["Email Empresa"] || v["EmailEmpresa"] || "correo@negociodemo.com";
 
         // Datos cliente/factura
         document.getElementById("tipodoc-header").textContent = v["TipoDoc"] || "FACTURA";
         document.getElementById("cliente").textContent = v["NombreCliente"] || "";
         document.getElementById("rtncliente").textContent = v["RTN Cliente"] || v["RTN"] || "";
-        document.getElementById("telefonocliente").textContent = v["Telefono Cliente"] || "";
-        document.getElementById("direccioncliente").textContent = v["Direccion Cliente"] || v["Direccion"] || "";
+        document.getElementById("telefonocliente").textContent = v["TelefonoCliente"] || "";
+        document.getElementById("direccioncliente").textContent = v["DireccionCliente"] || v["Direccion"] || "";
         document.getElementById("vendedor").textContent = v["Vendedor"] || "";
 
         document.getElementById("factura").textContent = v["Factura"] || v["No Venta"] || "";
-        document.getElementById("date").textContent = v["Fecha"] || "";
+        document.getElementById("date").textContent = v["Fecha hora"] || "";
         document.getElementById("cai").textContent = v["CAI"] || "";
         document.getElementById("rango").textContent = (v["Rango inicial"]||"") + " - " + (v["Rango final"]||"");
         document.getElementById("limite").textContent = v["Vencimiento"] || "";
@@ -270,7 +270,7 @@
         document.getElementById("ocexe").textContent = v["Orden Exenta"] || "";
         document.getElementById("ocexo").textContent = v["Registro Exonerado"] || "";
         document.getElementById("nosag").textContent = v["Registro SAG"] || "";
-        document.getElementById("formapago").textContent = v["FormaPago"] || "";
+        document.getElementById("formapago").textContent = v["Forma de pago"] || "";
         document.getElementById("plazo").textContent = v["Plazo"] || "";
         document.getElementById("pagos").textContent = v["Pagos"] || "";
         document.getElementById("cuota").textContent = v["Cuota"] || "";
