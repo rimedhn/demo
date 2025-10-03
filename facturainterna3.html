@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FACTURA</title>
+    <link rel="icon" href="https://github.com/rimedhn/elysium/blob/main/WhatsApp%20Image%202024-08-20%20at%203.20.41%20PM.jpeg?raw=true" type="image/x-icon">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+      }
+      #letter-size {
+        width: 5.5in;
+        min-height: 7in;
+        margin: 0.2in auto;
+        padding: 10px;
+        font-family: Arial, sans-serif;
+        background-color: #fff;
+        font-size: 10px;
+      }
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+          -webkit-print-color-adjust: exact;
+          color-adjust: exact;
+        }
+        @page {
+          margin-top: 0.5in;
+          margin-bottom: 0.5in;
+          margin-left: 0.5in;
+          margin-right: 0.5in;
+          size: letter;
+        }
+        #letter-size {
+          width: 100%;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-size: 10px;
+        }
+        table { page-break-inside: auto; }
+        tr { page-break-inside: avoid; page-break-after: auto; }
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
+      }
+      .label { text-align: center; font-size: 18px; margin-bottom: 10px; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+      table th, table td { border: 1px solid black; padding: 6px; text-align: left; vertical-align: top; }
+      .sin-bordes, .sin-bordes th, .sin-bordes td { border: none !important; }
+      #tabla-encabezado .logo-container { width: 20%; text-align: center; vertical-align: middle; }
+      #tabla-encabezado .empresa-info-container { width: 80%; vertical-align: middle; }
+      #tabla-encabezado .empresa-info-container b#empresa { font-size: 20px; display: block; margin-bottom: 4px; color: #333; }
+      #letter-size span#email-content { display: inline-block; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; max-width: 98%; vertical-align: top; }
+      #tabla-cliente-factura th { text-align: center; font-weight: bold; background-color: #e9e9e9; font-size: 11px; padding: 8px; }
+      #tabla-cliente-factura td > div { padding: 5px; }
+      #tabla-cliente-factura td { word-break: break-word; }
+      #tabla-productos thead th { text-align: center; font-weight: bold; background-color: #e9e9e9; font-size: 10px; padding: 7px; }
+      #tabla-productos tbody td { font-size: 10px; text-align: right; }
+      #tabla-productos tbody td.descripcion-producto { text-align: left; word-wrap: break-word; white-space: normal; }
+      #tabla-productos tbody td.cantidad-producto { text-align: center; }
+      #tabla-totales-observaciones .info-adicional { font-size: 9.5px; vertical-align: top; }
+      #tabla-totales-observaciones .info-adicional hr { border: none; border-top: 1px dashed #888; margin: 6px 0; }
+      #tabla-totales-observaciones .etiquetas-totales { text-align: right; font-weight: normal; }
+      #tabla-totales-observaciones .valores-totales { text-align: right; }
+      #tabla-totales-observaciones .etiquetas-totales b, #tabla-totales-observaciones .valores-totales b { font-weight: bold; }
+      #montoLetrasTotal, #agradecimientoFooter { text-align: center; font-size: 10px; padding: 8px; border-top: 1px solid black; }
+      #montoLetrasTotal { border-bottom: 1px solid black; margin-bottom: 10px; word-wrap: break-word; white-space: normal; }
+      #montoLetrasTotal span { font-weight: bold; }
+      #agradecimientoFooter { border-bottom: 1px solid black; margin-bottom: 10px; }
+      #tabla-footer td { font-size: 9px; vertical-align: middle; }
+      #tabla-footer .info-contacto-footer { text-align: left; }
+      #tabla-footer .barcode-footer { text-align: right; }
+      #tabla-footer canvas#barcode { max-width: 100%; height: auto; max-height: 45px; }
+      #letter-size h2#tipodoc-header { font-size: 18px; text-align: center; margin: 0 0 10px 0; font-weight: bold; color: #000; }
+      .mi-imagen { width: 90px; height: auto; max-height: 90px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  </head>
+  <body>
+    <div id="letter-size">
+      <!-- ... Encabezado, cliente, productos ... igual ... -->
+      <table id="tabla-encabezado" class="sin-bordes">
+        <tr>
+          <td class="logo-container">
+            <img src="https://github.com/rimedhn/elysium/blob/main/WhatsApp%20Image%202024-08-20%20at%203.20.41%20PM.jpeg?raw=true" alt="Logo Elysium Droguerìa" class="mi-imagen" onerror="this.style.display='none'">
+          </td>
+          <td class="empresa-info-container">
+            <b id="empresa"></b>
+            <b id="razon"></b> <b>RTN: <span id="rtn"></span></b><br />
+            <b>Dirección: <span id="direccion"></span></b><br />
+            <b>Teléfono: <span id="telefono"></span></b><br />
+            <b>Email: <span id="email-content"></span></b>
+          </td>
+        </tr>
+      </table>
+      <table id="tabla-cliente-factura">
+        <thead>
+          <tr>
+            <th colspan="12">
+              <h2 id="tipodoc-header">FACTURA</h2>
+            </th>
+          </tr>
+          <tr>
+            <th colspan="6" style="width: 50%;">Datos del Cliente</th>
+            <th colspan="6" style="width: 50%;">Datos de la Factura</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="6">
+              <div>
+                <b>Cliente: <span id="cliente"></span></b><br />
+                <b>RTN: <span id="rtncliente"></span></b><br />
+                <b>Teléfono: <span id="telefonocliente"></span></b><br />
+                <b>Dirección: <span id="direccioncliente"></span></b><br />
+                <b>Vendedor: <span id="vendedor"></span></b>
+              </div>
+            </td>
+            <td colspan="6">
+              <div>
+                <b>Factura No.: <span id="factura"></span></b><br />
+                <b>Fecha: <span id="date"></span></b><br />
+                <b>CAI: <span id="cai"></span></b><br />
+                <b>Rango Autorizado: <span id="rango"></span></b><br />
+                <b>Fecha Límite Emisión: <span id="limite"></span></b><br />
+                <b>Cajero: <span id="cajero"></span></b>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <table id="tabla-productos">
+        <thead>
+          <tr>
+            <td colspan="6" style="text-align:center; font-weight:bold; background-color: #e9e9e9;">Detalle de Productos/Servicios</td>
+          </tr>
+          <tr>
+            <th style="width: 10%;"><h2>Cant</h2></th>
+            <th style="width: 35%;"><h2>Descripción</h2></th>
+            <th style="width: 15%;"><h2>Precio</h2></th>
+            <th style="width: 15%;"><h2>Subtotal</h2></th>
+            <th style="width: 10%;"><h2>ISV</h2></th>
+            <th style="width: 15%;"><h2>Monto</h2></th>
+          </tr>
+        </thead>
+        <tbody id="productList"></tbody>
+      </table>
+      <table id="tabla-totales-observaciones">
+        <tr>
+          <td colspan="3" class="info-adicional" style="width: 50%;">
+            <b>Datos del Cliente Exonerado:</b><br />
+            Orden de Compra Exenta: <b id="ocexe"></b><br />
+            No. Registro Exonerado: <b id="ocexo"></b><br />
+            No. Registro SAG: <b id="nosag"></b>
+            <hr />
+            <b>Condiciones de Pago:</b><br />
+            Forma de Pago: <b id="formapago"></b><br />
+            Plazo en días: <b id="plazo"></b><br />
+            Cantidad de Pagos: <b id="pagos"></b><br />
+            Cuota por Pago: <b>L <span id="cuota"></span></b>
+            <hr />
+            Observaciones:<br />
+            <span id="observacion" style="display:block; min-height: 30px; word-wrap:break-word; white-space:normal;"></span>
+          </td>
+          <td colspan="1" class="etiquetas-totales" style="width: 30%;">
+            Subtotal:<br />
+            Descuentos y Rebajas:<br />
+            Valor Exento:<br />
+            Valor Exonerado:<br />
+            Gravado con 15%:<br />
+            Gravado con 18%:<br />
+            ISV 15%:<br />
+            ISV 18%:<br />
+            <b>Total Venta:</b>
+          </td>
+          <td colspan="2" class="valores-totales" style="width: 20%;">
+            L <span id="subtotal"></span><br />
+            L <span id="descuento"></span><br />
+            L <span id="subtotalexe"></span><br />
+            L <span id="subtotalexo"></span><br />
+            L <span id="subtotalisv15"></span><br />
+            L <span id="subtotalisv18"></span><br />
+            L <span id="isv15"></span><br />
+            L <span id="isv18"></span><br />
+            <b>L <span id="total"></span></b>
+          </td>
+        </tr>
+      </table>
+      <div id="montoLetrasTotal">
+        SON: <span id="montoLetras"></span>
+      </div>
+      <div id="agradecimientoFooter">
+        ¡Gracias por su preferencia!
+      </div>
+      <table id="tabla-footer" class="sin-bordes">
+        <tr>
+          <td class="info-contacto-footer" style="width: 70%;">
+            <b>Original: Cliente, Copia: Emisor</b><br />
+            <span>www.rmposhn.com</span><br /> <span>indime.hn@gmail.com</span><br /> <span>(+504) 9359-3126</span>
+          </td>
+          <td class="barcode-footer" style="width: 30%;">
+            <canvas alt="Código de Barras de Factura" id="barcode"></canvas>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script>
+      // Cambia esto por tu endpoint de Google Apps Script:
+      const API_URL = "https://script.google.com/macros/s/AKfycbxEbhdBTYCrL5_qkYYq0S9noDC0YHVE1EDw4Duvx53z6jYkNuIaC3Uf0GxK-xRTacF1/exec";
+
+      function formatCurrency(num) {
+        if (isNaN(num)) return "0.00";
+        return num.toLocaleString('es-HN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+      function getQueryParam(param) {
+        var urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+      }
+
+      // FUNCIONES DE FORMATO DE FECHA
+      function soloFecha(fechaHora) {
+        if (!fechaHora) return "";
+        return fechaHora.substring(0, 10);
+      }
+      function fechaYHora(fechaHora) {
+        if (!fechaHora) return "";
+        let s = fechaHora.substring(0, 19).replace("T", " ");
+        return s;
+      }
+
+      async function cargarFactura() {
+        const no_venta = getQueryParam('no_venta');
+        if (!no_venta) {
+          alert("Falta el parámetro no_venta en la URL.");
+          return;
+        }
+        let response = await fetch(API_URL + "?no_venta=" + encodeURIComponent(no_venta));
+        let data = await response.json();
+        if (data.error) {
+          alert("Error: " + data.error);
+          return;
+        }
+        const v = data.venta;
+        const productos = data.productos;
+
+        // Encabezado empresa (igual)
+        document.getElementById("empresa").textContent = v["Empresa"] || "DEMO";
+        document.getElementById("razon").textContent = v["Razon Social"] || "DEMO EMPRESA S DE R. L";
+        document.getElementById("rtn").textContent = v["RTN Empresa"] || v["RTN Negocio"] || "0000-0000-00000";
+        document.getElementById("direccion").textContent = v["Direccion Empresa"] || v["DireccionEmpresa"] || "DIRECCION DEL NEGOCIO";
+        document.getElementById("telefono").textContent = v["Telefono Empresa"] || v["TelefonoEmpresa"] || "+504 0000-0000";
+        document.getElementById("email-content").textContent = v["Email Empresa"] || v["EmailEmpresa"] || "correo@negociodemo.com";
+
+        document.getElementById("tipodoc-header").textContent = v["TipoDoc"] || "FACTURA";
+        document.getElementById("cliente").textContent = v["NombreCliente"] || "";
+        document.getElementById("rtncliente").textContent = v["RTN Cliente"] || v["RTN"] || "";
+        document.getElementById("telefonocliente").textContent = v["TelefonoCliente"] || "";
+        document.getElementById("direccioncliente").textContent = v["DireccionCliente"] || v["Direccion"] || "";
+        document.getElementById("vendedor").textContent = v["NombreVendedor"] || "";
+
+        document.getElementById("factura").textContent = v["Factura"] || v["No Venta"] || "";
+        document.getElementById("date").textContent = fechaYHora(v["Fecha hora"]);
+        document.getElementById("cai").textContent = v["CAI"] || "";
+        document.getElementById("rango").textContent = (v["Rango inicial"]||"") + " - " + (v["Rango final"]||"");
+        document.getElementById("limite").textContent = soloFecha(v["Vencimiento"]);
+        document.getElementById("cajero").textContent = v["NombreCajero"] || "";
+
+        document.getElementById("ocexe").textContent = v["Orden Exenta"] || "";
+        document.getElementById("ocexo").textContent = v["Registro Exonerado"] || "";
+        document.getElementById("nosag").textContent = v["Registro SAG"] || "";
+        document.getElementById("formapago").textContent = v["Forma de pago"] || "";
+        document.getElementById("plazo").textContent = v["PlazoDias"] || "";
+        document.getElementById("pagos").textContent = v["Plazo"] || "";
+        document.getElementById("cuota").textContent = v["Cuota"] || "";
+        document.getElementById("observacion").textContent = v["Observacion"] || "";
+
+        // Cálculo totales
+        let subtotal = 0, descuento = 0, valorExento = 0, valorExonerado = 0, gravado15 = 0, gravado18 = 0, isv15 = 0, isv18 = 0, total = 0;
+        const ISV_15 = 0.15, ISV_18 = 0.18;
+
+        function parseISV(value) {
+          if (value == undefined) return 0;
+          if (typeof value === "number") return value;
+          let v = (""+value).toUpperCase().replace(",",".").trim();
+          if (v === "EXENTO" || v === "EX" || v === "NO" || v === "" || v === "0" || v === "0.00") return 0;
+          if (v === "0.15" || v === "15" || v === "SI" || v === "GRAVADO15") return 0.15;
+          if (v === "0.18" || v === "18" || v === "GRAVADO18") return 0.18;
+          let num = parseFloat(v);
+          if (num === 0.15 || num === 0.18) return num;
+          if (num === 0) return 0;
+          return 0;
+        }
+
+        // Render productos
+        const productList = document.getElementById("productList");
+        productList.innerHTML = "";
+        productos.forEach(function(p) {
+          let cantidad = parseFloat(p["Cantidad"]) || 0;
+          let descripcion = p["Descripcion"] || p["Producto"] || "";
+          let precioBruto = parseFloat(p["Precio"]) || 0;
+          let isvProd = parseISV(p["Isv"]);
+
+          // Calcular precio neto solo para el subtotal de la línea
+          let precioNeto = precioBruto;
+          if (isvProd === 0.15) precioNeto = precioBruto / (1 + ISV_15);
+          else if (isvProd === 0.18) precioNeto = precioBruto / (1 + ISV_18);
+
+          let subtotalProd = cantidad * precioNeto;
+
+          let isvMonto = 0;
+          let monto = cantidad * precioBruto;
+
+          if (isvProd === 0) {
+            valorExento += subtotalProd;
+          } else if (isvProd === 0.15) {
+            gravado15 += subtotalProd;
+            isv15 += +(subtotalProd * ISV_15);
+          } else if (isvProd === 0.18) {
+            gravado18 += subtotalProd;
+            isv18 += +(subtotalProd * ISV_18);
+          }
+          subtotal += subtotalProd;
+
+          // Para columna ISV (monto del ISV en ese producto)
+          if (isvProd === 0.15) isvMonto = +(subtotalProd * ISV_15);
+          else if (isvProd === 0.18) isvMonto = +(subtotalProd * ISV_18);
+          else isvMonto = 0;
+
+          // Render fila
+          let row = productList.insertRow();
+          row.insertCell(0).textContent = cantidad;
+          row.cells[0].className = 'cantidad-producto';
+
+          row.insertCell(1).textContent = descripcion;
+          row.cells[1].className = 'descripcion-producto';
+
+          row.insertCell(2).textContent = formatCurrency(precioBruto);
+
+          row.insertCell(3).textContent = formatCurrency(subtotalProd);
+
+          row.insertCell(4).textContent = formatCurrency(isvMonto);
+
+          row.insertCell(5).textContent = formatCurrency(monto);
+        });
+
+        let tipoImpuesto = (v["Impuesto"] || "").toUpperCase().trim();
+
+        if (tipoImpuesto === "EXENTO") {
+          valorExento = subtotal;
+          valorExonerado = 0;
+          gravado15 = 0;
+          gravado18 = 0;
+          isv15 = 0;
+          isv18 = 0;
+          total = subtotal;
+        } else if (tipoImpuesto === "EXONERADO") {
+          valorExento = 0;
+          valorExonerado = subtotal;
+          gravado15 = 0;
+          gravado18 = 0;
+          isv15 = 0;
+          isv18 = 0;
+          total = subtotal;
+        } else {
+          total = subtotal + isv15 + isv18;
+          valorExonerado = 0;
+        }
+
+        document.getElementById("subtotal").textContent = formatCurrency(subtotal);
+        document.getElementById("descuento").textContent = "0.00";
+        document.getElementById("subtotalexe").textContent = formatCurrency(valorExento);
+        document.getElementById("subtotalexo").textContent = formatCurrency(valorExonerado);
+        document.getElementById("subtotalisv15").textContent = formatCurrency(gravado15);
+        document.getElementById("subtotalisv18").textContent = formatCurrency(gravado18);
+        document.getElementById("isv15").textContent = formatCurrency(isv15);
+        document.getElementById("isv18").textContent = formatCurrency(isv18);
+        document.getElementById("total").textContent = formatCurrency(total);
+
+        // Código de barras local
+        JsBarcode("#barcode", v["No Venta"] || v["Factura"] || "", {
+          format: "CODE128", width: 2, height: 45, displayValue: false, margin: 0
+        });
+
+        document.getElementById("montoLetras").textContent = montoALetras(total);
+
+        setTimeout(()=>window.print(), 600);
+      }
+
+      function montoALetras(monto) {
+        if (isNaN(monto)) return "CERO LEMPIRAS";
+        let entero = Math.floor(monto);
+        let decimales = Math.round((monto - entero) * 100);
+        decimales = decimales < 10 ? "0" + decimales : decimales;
+        let letras = numALetras(entero);
+        return (letras || "CERO") + " LEMPIRAS CON " + decimales + "/100";
+      }
+      function numALetras(num) {
+        if (num === 0) return "CERO";
+        let unidades = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"];
+        let decenas = ["", "DIEZ", "VEINTE", "TREINTA", "CUARENTA", "CINCUENTA", "SESENTA", "SETENTA", "OCHENTA", "NOVENTA"];
+        let especiales = {11: "ONCE", 12: "DOCE", 13: "TRECE", 14: "CATORCE", 15: "QUINCE"};
+        let centenas = ["", "CIENTO", "DOSCIENTOS", "TRESCIENTOS", "CUATROCIENTOS", "QUINIENTOS", "SEISCIENTOS", "SETECIENTOS", "OCHOCIENTOS", "NOVECIENTOS"];
+        let resultado = "";
+        if (num === 100) return "CIEN";
+        if (num > 999999) return "NÚMERO MUY GRANDE";
+        let miles = Math.floor(num / 1000);
+        let resto = num % 1000;
+        if (miles > 0) {
+          if (miles === 1) resultado += "MIL ";
+          else resultado += numALetras(miles) + " MIL ";
+        }
+        if (resto > 0) {
+          let centenasNum = Math.floor(resto / 100);
+          let decenasNum = Math.floor((resto % 100) / 10);
+          let unidadesNum = resto % 10;
+          if (centenasNum > 0) resultado += centenas[centenasNum] + " ";
+          let decenaUnida = resto % 100;
+          if (decenaUnida >= 11 && decenaUnida <= 15) {
+            resultado += especiales[decenaUnida] + " ";
+          } else if (decenaUnida < 10) {
+            resultado += unidades[decenaUnida] + " ";
+          } else if (decenaUnida === 10) {
+            resultado += "DIEZ ";
+          } else if (decenaUnida === 20) {
+            resultado += "VEINTE ";
+          } else if (decenaUnida > 20 && decenaUnida < 30) {
+            resultado += "VEINTI" + unidades[unidadesNum].toLowerCase() + " ";
+          } else {
+            resultado += decenas[decenasNum];
+            if (unidadesNum > 0) resultado += " Y " + unidades[unidadesNum];
+            resultado += " ";
+          }
+        }
+        return resultado.trim();
+      }
+      window.onload = cargarFactura;
+    </script>
+  </body>
+</html>
