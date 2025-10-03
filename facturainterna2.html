@@ -291,26 +291,32 @@
         productos.forEach(function(p) {
           let cantidad = parseFloat(p["Cantidad"]) || 0;
           let descripcion = p["Descripcion"] || p["Producto"] || "";
-          let precio = parseFloat(p["Precio"]) || 0;
+          let precioBruto = parseFloat(p["Precio"]) || 0;
           let isvProd = parseISV(p["Isv"]);
-          let subtotalProd = cantidad * precio;
+          // Calcular precio neto (sin ISV) para el subtotal de la línea
+          let precioNeto = precioBruto;
+          if (isvProd === 0.15) precioNeto = precioBruto / (1 + ISV_15);
+          else if (isvProd === 0.18) precioNeto = precioBruto / (1 + ISV_18);
+
+          let subtotalProd = cantidad * precioNeto;
+
           let isvMonto = 0;
-          let monto = subtotalProd;
+          let monto = cantidad * precioBruto;
 
           if (isvProd === 0) {
             valorExento += subtotalProd;
           } else if (isvProd === 0.15) {
             gravado15 += subtotalProd;
-            isv15 += +(subtotalProd * ISV_15 / (1 + ISV_15));
+            isv15 += +(subtotalProd * ISV_15);
           } else if (isvProd === 0.18) {
             gravado18 += subtotalProd;
-            isv18 += +(subtotalProd * ISV_18 / (1 + ISV_18));
+            isv18 += +(subtotalProd * ISV_18);
           }
           subtotal += subtotalProd;
 
           // Para columna ISV (monto del ISV en ese producto)
-          if (isvProd === 0.15) isvMonto = +(subtotalProd * ISV_15 / (1 + ISV_15));
-          else if (isvProd === 0.18) isvMonto = +(subtotalProd * ISV_18 / (1 + ISV_18));
+          if (isvProd === 0.15) isvMonto = +(subtotalProd * ISV_15);
+          else if (isvProd === 0.18) isvMonto = +(subtotalProd * ISV_18);
           else isvMonto = 0;
 
           // Render fila
@@ -321,7 +327,7 @@
           row.insertCell(1).textContent = descripcion;
           row.cells[1].className = 'descripcion-producto';
 
-          row.insertCell(2).textContent = formatCurrency(precio);
+          row.insertCell(2).textContent = formatCurrency(precioNeto);
 
           row.insertCell(3).textContent = formatCurrency(subtotalProd);
 
