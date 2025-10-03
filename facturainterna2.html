@@ -293,7 +293,8 @@
           let descripcion = p["Descripcion"] || p["Producto"] || "";
           let precioBruto = parseFloat(p["Precio"]) || 0;
           let isvProd = parseISV(p["Isv"]);
-          // Calcular precio neto (sin ISV) para el subtotal de la línea
+
+          // Calcular precio neto solo para el subtotal de la línea
           let precioNeto = precioBruto;
           if (isvProd === 0.15) precioNeto = precioBruto / (1 + ISV_15);
           else if (isvProd === 0.18) precioNeto = precioBruto / (1 + ISV_18);
@@ -327,9 +328,9 @@
           row.insertCell(1).textContent = descripcion;
           row.cells[1].className = 'descripcion-producto';
 
-          row.insertCell(2).textContent = formatCurrency(precioNeto);
+          row.insertCell(2).textContent = formatCurrency(precioBruto); // PRECIO BRUTO (igual que antes)
 
-          row.insertCell(3).textContent = formatCurrency(subtotalProd);
+          row.insertCell(3).textContent = formatCurrency(subtotalProd); // SUBTOTAL NETO (sin ISV)
 
           row.insertCell(4).textContent = formatCurrency(isvMonto);
 
