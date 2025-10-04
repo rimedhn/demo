@@ -3,15 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=300, initial-scale=1.0">
   <title id="ticket-title">Recibo de Pago</title>
   <link rel="icon" href="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true">
   <style>
-    body {
-      font-family: 'Courier New', monospace;
-      width: 300px; max-width: 300px;
-      margin: 0 auto; padding: 10px; color: #000; background: #fff; line-height: 1.4;
-    }
+    body { font-family: 'Courier New', monospace; width: 300px; max-width: 300px; margin: 0 auto; padding: 10px; background: #fff; color: #000; }
     .centered { text-align: center; }
     .logo { max-width: 70px; margin: 0 auto 8px; display: block; }
     .dotted { border-top: 1px dotted #000; margin: 10px 0; }
@@ -31,13 +27,13 @@
 <body>
 <div id="ticket-container">
   <div class="centered">
-    <img class="logo" id="empresa_logo" src="" alt="Logo">
+    <img class="logo" id="empresa_logo" src="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true" alt="Logo">
     <div style="margin-bottom:2px;">
-      <div id="empresa_nombre"><strong></strong></div>
-      <div class="small">RTN: <span id="empresa_rtn"></span></div>
-      <div class="small" id="empresa_direccion"></div>
-      <div class="small">Email: <span id="empresa_email"></span></div>
-      <div class="small">Tel: <span id="empresa_telefono"></span></div>
+      <div id="empresa_nombre"><strong>Inv. Honduras City Tours</strong></div>
+      <div class="small">RTN: <span id="empresa_rtn">08019009248261</span></div>
+      <div class="small" id="empresa_direccion">Aldeas las casitas atrás de la secretaria de seguridad. Tegucigalpa, F. M</div>
+      <div class="small">Email: <span id="empresa_email">gerencia@citytourstaxi.com</span></div>
+      <div class="small">Tel: <span id="empresa_telefono">2247-7650</span></div>
     </div>
   </div>
   <div class="dotted"></div>
@@ -72,75 +68,86 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9AmvEfr1z31vcbKsDPxDbtitZQMJNf-MI10tb-NcSZaCCyE3w2-3vYBS5ppW_qyhR/exec';
+// URLs de tus hojas publicadas como JSON Visualization API
+const SHEET_ID = '1VPdlCZXcHfOGCfdnarxrfyKTNHDQQU9E_ISW_qj66YU';
+const URL_GENERAL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Abonos%20ventas`;
+const URL_DETALLE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Abono%20ventas`;
 
-function initRecibo() {
+function parseGoogleSheetJSON(jsonText) {
+  // Google envuelve el JSON en "someFunc(...);"
+  const json = JSON.parse(jsonText.substr(jsonText.indexOf('{')));
+  const cols = json.table.cols.map(col => col.label.trim());
+  return json.table.rows.map(row =>
+    Object.fromEntries(row.c.map((cell, i) => [cols[i], cell ? cell.v : ""]))
+  );
+}
+
+async function fetchRecibo(abonoId) {
+  // 1. Carga tabla general
+  let general, detalle;
+  try {
+    let resGeneral = await fetch(URL_GENERAL);
+    let txtGeneral = await resGeneral.text();
+    let rowsGeneral = parseGoogleSheetJSON(txtGeneral);
+    general = rowsGeneral.find(r => String(r["id abono"]) === String(abonoId));
+    if (!general) throw new Error("No existe abono con ese id");
+    document.getElementById('folio').textContent = general.Folio || "";
+    document.getElementById('fecha_hora').textContent = general["Fecha hora"] || "";
+    document.getElementById('nombre_cliente').textContent = general.NombreCliente || "";
+    document.getElementById('nombre_cajero').textContent = general.NombreCajero || "";
+    document.getElementById('sucursal').textContent = general.Sucursal || "";
+    document.getElementById('caja').textContent = general.Caja || "";
+    document.getElementById('observacion').textContent = general.Observacion || "-";
+    document.getElementById('saldo_anterior').textContent = Number(general.SaldoAnterior||0).toFixed(2);
+    document.getElementById('total_pago').textContent = Number(general.TotalPago||0).toFixed(2);
+    document.getElementById('saldo_final').textContent = Number(general.SaldoFinal||0).toFixed(2);
+    document.getElementById('saldo_cliente').textContent = Number(general.SaldoCliente||0).toFixed(2);
+  } catch (e) {
+    document.getElementById('ticket-container').innerHTML = `<div class="centered">Error cargando datos generales: ${e.message}</div>`;
+    return;
+  }
+
+  // 2. Carga detalle de medios de pago
+  try {
+    let resDetalle = await fetch(URL_DETALLE);
+    let txtDetalle = await resDetalle.text();
+    let rowsDetalle = parseGoogleSheetJSON(txtDetalle);
+    let pagos = rowsDetalle.filter(r => String(r["id abono"]) === String(abonoId));
+    const body = document.getElementById('detalle_medios_pago_body');
+    body.innerHTML = "";
+    if (pagos.length) {
+      pagos.forEach(item => {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        td1.textContent = item["Medio de pago"] || item["MediodePago"] || "";
+        const td2 = document.createElement('td');
+        td2.textContent = "L" + Number(item.Monto || 0).toFixed(2);
+        td2.className = 'amount';
+        tr.appendChild(td1); tr.appendChild(td2);
+        body.appendChild(tr);
+      });
+    } else {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 2; td.textContent = 'Sin detalle de pago';
+      tr.appendChild(td); body.appendChild(tr);
+    }
+    setTimeout(()=>window.print(), 300);
+  } catch (e) {
+    document.getElementById('ticket-container').innerHTML = `<div class="centered">Error cargando detalle de pago: ${e.message}</div>`;
+  }
+}
+
+// INICIO
+(function() {
   const urlParams = new URLSearchParams(window.location.search);
   const abonoId = urlParams.get('abonoId');
   if (!abonoId) {
     document.getElementById('ticket-container').innerHTML = '<div class="centered">Error: Falta abonoId</div>';
     return;
   }
-  document.getElementById('ticket-container').innerHTML = '<div class="centered">Cargando recibo...</div>';
-  fetch(`${APPS_SCRIPT_URL}?abonoId=${encodeURIComponent(abonoId)}`)
-    .then(r => r.json())
-    .then(data => {
-      if (data.error) {
-        document.getElementById('ticket-container').innerHTML = '<div class="centered">Error: '+data.error+'</div>';
-        return;
-      }
-      renderTicket(data);
-    })
-    .catch(err => {
-      document.getElementById('ticket-container').innerHTML = '<div class="centered">Error de red: '+err.message+'</div>';
-    });
-}
-
-function renderTicket(data) {
-  document.getElementById('empresa_logo').src = data.empresa_logo;
-  document.getElementById('empresa_nombre').innerHTML = `<strong>${data.empresa_nombre||''}</strong>`;
-  document.getElementById('empresa_rtn').textContent = data.empresa_rtn||'';
-  document.getElementById('empresa_direccion').textContent = data.empresa_direccion||'';
-  document.getElementById('empresa_email').textContent = data.empresa_email||'';
-  document.getElementById('empresa_telefono').textContent = data.empresa_telefono||'';
-
-  document.getElementById('folio').textContent = data.folio||'';
-  document.getElementById('fecha_hora').textContent = data.fecha_hora||'';
-  document.getElementById('nombre_cliente').textContent = data.nombre_cliente||'';
-  document.getElementById('nombre_cajero').textContent = data.nombre_cajero||'';
-  document.getElementById('sucursal').textContent = data.sucursal||'';
-  document.getElementById('caja').textContent = data.caja||'';
-  document.getElementById('observacion').textContent = data.observacion||'';
-
-  const body = document.getElementById('detalle_medios_pago_body');
-  body.innerHTML = '';
-  if (data.detalle_medios_pago && data.detalle_medios_pago.length) {
-    data.detalle_medios_pago.forEach(item => {
-      const tr = document.createElement('tr');
-      const td1 = document.createElement('td');
-      td1.textContent = item.medio_de_pago;
-      const td2 = document.createElement('td');
-      td2.textContent = 'L' + item.monto;
-      td2.className = 'amount';
-      tr.appendChild(td1); tr.appendChild(td2);
-      body.appendChild(tr);
-    });
-  } else {
-    const tr = document.createElement('tr');
-    const td = document.createElement('td');
-    td.colSpan = 2; td.textContent = 'Sin detalle de pago';
-    tr.appendChild(td); body.appendChild(tr);
-  }
-
-  document.getElementById('saldo_anterior').textContent = data.saldo_anterior||'0.00';
-  document.getElementById('total_pago').textContent = data.total_pago||'0.00';
-  document.getElementById('saldo_final').textContent = data.saldo_final||'0.00';
-  document.getElementById('saldo_cliente').textContent = data.saldo_cliente||'0.00';
-
-  setTimeout(()=>window.print(), 300);
-}
-
-initRecibo();
+  fetchRecibo(abonoId);
+})();
 </script>
 </body>
 </html>
