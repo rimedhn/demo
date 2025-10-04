@@ -68,14 +68,17 @@
 </div>
 
 <script>
-// URLs de tus hojas publicadas como JSON Visualization API
+// CONFIGURACIÓN
 const SHEET_ID = '1VPdlCZXcHfOGCfdnarxrfyKTNHDQQU9E_ISW_qj66YU';
 const URL_GENERAL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Abonos%20ventas`;
 const URL_DETALLE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Abono%20ventas`;
 
+// Función robusta para parsear json envuelto de Google Visualization
 function parseGoogleSheetJSON(jsonText) {
-  // Google envuelve el JSON en "someFunc(...);"
-  const json = JSON.parse(jsonText.substr(jsonText.indexOf('{')));
+  const start = jsonText.indexOf('(');
+  const end = jsonText.lastIndexOf(')');
+  if (start === -1 || end === -1) throw new Error('Formato de respuesta inesperado');
+  const json = JSON.parse(jsonText.substring(start + 1, end));
   const cols = json.table.cols.map(col => col.label.trim());
   return json.table.rows.map(row =>
     Object.fromEntries(row.c.map((cell, i) => [cols[i], cell ? cell.v : ""]))
