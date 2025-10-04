@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <base target="_top">
+  <meta name="viewport" content="width=350, initial-scale=1.0">
+  <title id="ticket-title">Recibo de Pago</title>
+  <link rel="icon" href="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true">
+  <link href="https://fonts.googleapis.com/css2?family=Arial+Narrow:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      width: 80mm !important;
+      max-width: 80mm !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #fff;
+      color: #000;
+    }
+    body {
+      font-family: 'Arial Narrow', Arial, 'Liberation Sans', 'Nimbus Sans', sans-serif;
+      line-height: 1.32;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    #ticket-container {
+      width: calc(100% - 5mm);
+      margin: 10mm 2.5mm 10mm 2.5mm;
+      padding: 0 !important;
+    }
+    .centered { text-align: center; }
+    .logo { max-width: 70px; margin: 0 auto 8px; display: block; }
+    .line { border-top: 1.5px solid #000; margin: 10px 0; }
+    .section-title { font-size: 1.12em; font-weight: bold; text-align: center; margin: 10px 0 6px 0; }
+    .bold { font-weight: bold; }
+    .table { width: 100%; border-collapse: collapse; font-size: 1em; }
+    .table th, .table td { padding: 2px 0; }
+    .table th { border-bottom: 1.5px solid #000; text-align: center; font-weight: bold; font-size: 0.98em; }
+    .amount { text-align: right; }
+    .totals { margin-top: 8px; font-size: 1em; width: 100%; }
+    .totals tr td { padding: 0; }
+    .totals .total { font-weight: bold; font-size: 1.07em; }
+    .small { font-size: 0.93em;}
+    .ticket-label { font-weight: bold; font-size: 1.04em; }
+    @media print {
+      html, body {
+        width: 80mm !important;
+        max-width: 80mm !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      #ticket-container {
+        width: calc(100% - 5mm) !important;
+        margin: 10mm 2.5mm 10mm 2.5mm !important;
+        padding: 0 !important;
+      }
+      .line { margin-left: 0 !important; margin-right: 0 !important; }
+      @page {
+        size: 80mm auto;
+        margin: 10mm 2.5mm 10mm 2.5mm;
+      }
+    }
+  </style>
+</head>
+<body>
+<div id="ticket-container">
+  <div class="centered section">
+    <img class="logo" id="empresa_logo" src="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true" alt="Logo">
+    <div><span class="bold" id="empresa_nombre">Inv. Honduras City Tours</span></div>
+    <div class="small">RTN: <span id="empresa_rtn">08019009248261</span></div>
+    <div class="small" id="empresa_direccion">Dirección: Aldeas las casitas atrás de la secretaria de seguridad. Tegucigalpa, F. M</div>
+    <div class="small">Email: <span id="empresa_email">gerencia@citytourstaxi.com</span></div>
+    <div class="small">Teléfono: <span id="empresa_telefono">2247-7650</span></div>
+  </div>
+  <div class="line"></div>
+  <div class="centered section-title">Recibo de pago</div>
+  <div class="centered section small">
+    <span class="ticket-label">Folio:</span> <span id="folio"></span>
+    <br>
+    <span id="fecha_hora"></span>
+    <br>
+    <span class="ticket-label">Cuota No:</span> <span id="cuota_no"></span> 
+    <br>
+    <span class="ticket-label">Cuota:</span> <span id="cuota"></span>
+  </div>
+  <div class="line"></div>
+  <div>
+    <div class="ticket-label">Cliente: <span class="bold" id="nombre_cliente"></span></div>
+  </div>
+  <div class="line"></div>
+  <div class="small">
+    <div>Cajero: <span id="nombre_cajero"></span></div>
+    <div>Sucursal: <span id="sucursal"></span></div>
+    <div>Caja: <span id="caja"></span></div>
+  </div>
+  <div class="line"></div>
+  <div class="small">
+    <div>Observaciones:</div>
+    <div><span id="observacion"></span></div>
+  </div>
+  <div class="line"></div>
+  <div class="section-title">Detalles del pago</div>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Medio de pago</th>
+        <th>Monto</th>
+      </tr>
+    </thead>
+    <tbody id="detalle_medios_pago_body"></tbody>
+  </table>
+  <div class="line"></div>
+  <table class="totals">
+    <tr><td style="text-align:right">Saldo anterior:</td><td style="text-align:right" class="bold" id="saldo_anterior"></td></tr>
+    <tr><td style="text-align:right">Abono:</td><td style="text-align:right" class="bold" id="abono"></td></tr>
+    <tr><td style="text-align:right">Recargo:</td><td style="text-align:right" class="bold" id="recargo"></td></tr>
+    <tr><td style="text-align:right" class="total">Total pagado:</td><td style="text-align:right" class="bold total" id="total_pago"></td></tr>
+    <tr><td style="text-align:right">Saldo final:</td><td style="text-align:right" id="saldo_final"></td></tr>
+    <tr><td style="text-align:right">Saldo cliente:</td><td style="text-align:right" id="saldo_cliente"></td></tr>
+  </table>
+  <div class="line"></div>
+  <div class="centered section-title small">¡Gracias por su pago!</div>
+</div>
+
+<script>
+// CONFIGURACIÓN
+const SHEET_ID = '1VPdlCZXcHfOGCfdnarxrfyKTNHDQQU9E_ISW_qj66YU';
+const URL_GENERAL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Abonos%20ventas`;
+const URL_DETALLE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Abono%20ventas`;
+
+function parseGoogleSheetJSON(jsonText) {
+  const start = jsonText.indexOf('(');
+  const end = jsonText.lastIndexOf(')');
+  if (start === -1 || end === -1) throw new Error('Formato de respuesta inesperado');
+  const json = JSON.parse(jsonText.substring(start + 1, end));
+  const cols = json.table.cols.map(col => col.label.trim());
+  return json.table.rows.map(row =>
+    Object.fromEntries(row.c.map((cell, i) => [cols[i], cell ? cell.v : ""]))
+  );
+}
+
+function formatFechaHora(valor) {
+  if (!valor) return "";
+  if (typeof valor === 'string' && valor.startsWith('Date(')) {
+    const m = valor.match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/);
+    if (m) {
+      const [ , y, mo, d, h, mi ] = m.map(Number);
+      return (
+        String(d).padStart(2, '0') + '-' +
+        String(mo+1).padStart(2, '0') + '-' +
+        String(y) + ' ' +
+        String(h).padStart(2, '0') + ':' +
+        String(mi).padStart(2, '0')
+      );
+    }
+  }
+  return valor;
+}
+
+function formatoMoneda(valor) {
+  let num = Number(valor || 0);
+  return 'L' + num.toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+async function fetchRecibo(abonoId) {
+  let general;
+  try {
+    let resGeneral = await fetch(URL_GENERAL);
+    let txtGeneral = await resGeneral.text();
+    let rowsGeneral = parseGoogleSheetJSON(txtGeneral);
+    general = rowsGeneral.find(r => String(r["id abono"]) === String(abonoId));
+    if (!general) throw new Error("No existe abono con ese id");
+    document.getElementById('folio').textContent = general.Folio || "";
+    document.getElementById('fecha_hora').textContent = "Fecha hora: " + formatFechaHora(general["Fecha hora"]);
+    document.getElementById('nombre_cliente').textContent = general.NombreCliente || "";
+    document.getElementById('nombre_cajero').textContent = general.NombreCajero || "";
+    document.getElementById('sucursal').textContent = general.Sucursal || "";
+    document.getElementById('caja').textContent = general.Caja || "";
+    document.getElementById('observacion').textContent = general.Observacion || "-";
+    document.getElementById('cuota_no').textContent = general.No || "";
+    document.getElementById('cuota').textContent = formatoMoneda(general.Cuota || "");
+    document.getElementById('saldo_anterior').textContent = formatoMoneda(general.SaldoAnterior);
+    document.getElementById('total_pago').textContent = formatoMoneda(general.TotalPago);
+    document.getElementById('saldo_final').textContent = formatoMoneda(general.SaldoFinal);
+    document.getElementById('saldo_cliente').textContent = formatoMoneda(general.SaldoCliente);
+    document.getElementById('recargo').textContent = formatoMoneda(general.Recargo || 0);
+    document.getElementById('abono').textContent = formatoMoneda(general.Abono || 0);
+  } catch (e) {
+    document.getElementById('ticket-container').innerHTML = `<div class="centered">Error cargando datos generales: ${e.message}</div>`;
+    return;
+  }
+
+  try {
+    let resDetalle = await fetch(URL_DETALLE);
+    let txtDetalle = await resDetalle.text();
+    let rowsDetalle = parseGoogleSheetJSON(txtDetalle);
+    let pagos = rowsDetalle.filter(r => String(r["id abono"]) === String(abonoId));
+    const body = document.getElementById('detalle_medios_pago_body');
+    body.innerHTML = "";
+    if (pagos.length) {
+      pagos.forEach(item => {
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td');
+        td1.textContent = item["MediodePago"] || item["Medio de pago"] || "";
+        const td2 = document.createElement('td');
+        td2.textContent = formatoMoneda(item.Monto);
+        td2.className = 'amount';
+        tr.appendChild(td1); tr.appendChild(td2);
+        body.appendChild(tr);
+      });
+    } else {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 2; td.textContent = 'Sin detalle de pago';
+      tr.appendChild(td); body.appendChild(tr);
+    }
+    setTimeout(()=>window.print(), 300);
+  } catch (e) {
+    document.getElementById('ticket-container').innerHTML = `<div class="centered">Error cargando detalle de pago: ${e.message}</div>`;
+  }
+}
+
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const abonoId = urlParams.get('abonoId');
+  if (!abonoId) {
+    document.getElementById('ticket-container').innerHTML = '<div class="centered">Error: Falta abonoId</div>';
+    return;
+  }
+  fetchRecibo(abonoId);
+})();
+</script>
+</body>
+</html>
