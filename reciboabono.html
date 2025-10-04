@@ -76,7 +76,8 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxosV_IpUgyHJn_44Z06AGTQraJ9Bl6jsZ5CvomHIaWjGaGYWvg456wEJjw8ynN-odL/exec'; // Pega aquí la URL de despliegue de tu Apps Script
+// Pega aquí la URL de tu Apps Script Web App (implementa nueva versión si actualizaste el script)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxr7jUlSlpr5orfe8tZvwqr_anXIb429VAUvd7shfoc9Ru1YMuj5qE6stvu33cfhmvt/exec';
 
 function initRecibo() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -86,7 +87,7 @@ function initRecibo() {
     return;
   }
   document.getElementById('ticket-container').innerHTML = '<div class="centered">Cargando recibo...</div>';
-  fetch(`${APPS_SCRIPT_URL}?abonoId=${abonoId}`)
+  fetch(`${APPS_SCRIPT_URL}?abonoId=${encodeURIComponent(abonoId)}`)
     .then(r => r.json())
     .then(data => {
       if (data.error) {
