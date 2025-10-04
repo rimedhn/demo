@@ -40,11 +40,9 @@
       <div class="small">Tel: <span id="empresa_telefono"></span></div>
     </div>
   </div>
-
   <div class="dotted"></div>
   <div class="centered"><b>RECIBO DE PAGO</b></div>
   <div class="centered small">Folio: <span id="folio"></span> | <span id="fecha_hora"></span></div>
-
   <div class="dotted"></div>
   <div class="small"><b>Cliente:</b> <span id="nombre_cliente"></span></div>
   <div class="small"><b>Cajero:</b> <span id="nombre_cajero"></span></div>
@@ -52,7 +50,6 @@
   <div class="small"><b>Caja:</b> <span id="caja"></span></div>
   <div class="small"><b>Observaciones:</b> <span id="observacion"></span></div>
   <div class="dotted"></div>
-
   <div class="centered small"><b>DETALLE DE PAGO</b></div>
   <table class="table">
     <thead>
@@ -63,7 +60,6 @@
     </thead>
     <tbody id="detalle_medios_pago_body"></tbody>
   </table>
-
   <div class="dotted"></div>
   <div class="totals">
     <div>Saldo anterior: L <span id="saldo_anterior"></span></div>
@@ -76,8 +72,7 @@
 </div>
 
 <script>
-// Pega aquí la URL de tu Apps Script Web App (implementa nueva versión si actualizaste el script)
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxr7jUlSlpr5orfe8tZvwqr_anXIb429VAUvd7shfoc9Ru1YMuj5qE6stvu33cfhmvt/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9AmvEfr1z31vcbKsDPxDbtitZQMJNf-MI10tb-NcSZaCCyE3w2-3vYBS5ppW_qyhR/exec';
 
 function initRecibo() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -102,66 +97,46 @@ function initRecibo() {
 }
 
 function renderTicket(data) {
-  document.getElementById('ticket-container').innerHTML = `
-    <div class="centered">
-      <img class="logo" id="empresa_logo" src="${data.empresa_logo}" alt="Logo">
-      <div style="margin-bottom:2px;">
-        <div id="empresa_nombre"><strong>${data.empresa_nombre}</strong></div>
-        <div class="small">RTN: <span id="empresa_rtn">${data.empresa_rtn}</span></div>
-        <div class="small" id="empresa_direccion">${data.empresa_direccion}</div>
-        <div class="small">Email: <span id="empresa_email">${data.empresa_email}</span></div>
-        <div class="small">Tel: <span id="empresa_telefono">${data.empresa_telefono}</span></div>
-      </div>
-    </div>
-    <div class="dotted"></div>
-    <div class="centered"><b>RECIBO DE PAGO</b></div>
-    <div class="centered small">Folio: <span id="folio">${data.folio||''}</span> | <span id="fecha_hora">${data.fecha_hora||''}</span></div>
-    <div class="dotted"></div>
-    <div class="small"><b>Cliente:</b> <span id="nombre_cliente">${data.nombre_cliente||''}</span></div>
-    <div class="small"><b>Cajero:</b> <span id="nombre_cajero">${data.nombre_cajero||''}</span></div>
-    <div class="small"><b>Sucursal:</b> <span id="sucursal">${data.sucursal||''}</span></div>
-    <div class="small"><b>Caja:</b> <span id="caja">${data.caja||''}</span></div>
-    <div class="small"><b>Observaciones:</b> <span id="observacion">${data.observacion||''}</span></div>
-    <div class="dotted"></div>
-    <div class="centered small"><b>DETALLE DE PAGO</b></div>
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Medio de pago</th>
-          <th>Monto</th>
-        </tr>
-      </thead>
-      <tbody id="detalle_medios_pago_body"></tbody>
-    </table>
-    <div class="dotted"></div>
-    <div class="totals">
-      <div>Saldo anterior: L <span id="saldo_anterior">${data.saldo_anterior||'0.00'}</span></div>
-      <div class="total">Total pagado: L <span id="total_pago">${data.total_pago||'0.00'}</span></div>
-      <div>Saldo final: L <span id="saldo_final">${data.saldo_final||'0.00'}</span></div>
-      <div>Saldo cliente: L <span id="saldo_cliente">${data.saldo_cliente||'0.00'}</span></div>
-    </div>
-    <div class="dotted"></div>
-    <div class="centered small">¡Gracias por su pago!</div>
-  `;
-  // Render medios de pago
+  document.getElementById('empresa_logo').src = data.empresa_logo;
+  document.getElementById('empresa_nombre').innerHTML = `<strong>${data.empresa_nombre||''}</strong>`;
+  document.getElementById('empresa_rtn').textContent = data.empresa_rtn||'';
+  document.getElementById('empresa_direccion').textContent = data.empresa_direccion||'';
+  document.getElementById('empresa_email').textContent = data.empresa_email||'';
+  document.getElementById('empresa_telefono').textContent = data.empresa_telefono||'';
+
+  document.getElementById('folio').textContent = data.folio||'';
+  document.getElementById('fecha_hora').textContent = data.fecha_hora||'';
+  document.getElementById('nombre_cliente').textContent = data.nombre_cliente||'';
+  document.getElementById('nombre_cajero').textContent = data.nombre_cajero||'';
+  document.getElementById('sucursal').textContent = data.sucursal||'';
+  document.getElementById('caja').textContent = data.caja||'';
+  document.getElementById('observacion').textContent = data.observacion||'';
+
   const body = document.getElementById('detalle_medios_pago_body');
+  body.innerHTML = '';
   if (data.detalle_medios_pago && data.detalle_medios_pago.length) {
-    for (const item of data.detalle_medios_pago) {
+    data.detalle_medios_pago.forEach(item => {
       const tr = document.createElement('tr');
       const td1 = document.createElement('td');
       td1.textContent = item.medio_de_pago;
       const td2 = document.createElement('td');
-      td2.textContent = 'L'+item.monto;
+      td2.textContent = 'L' + item.monto;
       td2.className = 'amount';
       tr.appendChild(td1); tr.appendChild(td2);
       body.appendChild(tr);
-    }
+    });
   } else {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = 2; td.textContent = 'Sin detalle de pago';
     tr.appendChild(td); body.appendChild(tr);
   }
+
+  document.getElementById('saldo_anterior').textContent = data.saldo_anterior||'0.00';
+  document.getElementById('total_pago').textContent = data.total_pago||'0.00';
+  document.getElementById('saldo_final').textContent = data.saldo_final||'0.00';
+  document.getElementById('saldo_cliente').textContent = data.saldo_cliente||'0.00';
+
   setTimeout(()=>window.print(), 300);
 }
 
