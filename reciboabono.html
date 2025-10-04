@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="ticket-title">Recibo de Pago</title>
+    <link rel="icon" type="image/png" href="https://github.com/rimedhn/demo/blob/main/Logo.png?raw=true">
+    
+    <style>
+        /* CSS para simular papel térmico */
+        body {
+            font-family: 'Courier New', monospace;
+            width: 300px; 
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+            color: #000;
+            background-color: #fff;
+            line-height: 1.4;
+        }
+        
+        @media print {
+            body {
+                margin: 0;
+                width: 100%;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        .centered { text-align: center; }
+        .company-logo { max-width: 80px; display: block; margin: 0 auto 10px; }
+        .dotted-line { border-top: 1px dotted #000; margin: 10px 0; height: 0; }
+        .section-title { font-size: 1.1em; font-weight: bold; text-align: center; margin: 10px 0 5px 0; }
+        .payment-details { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .payment-details th, .payment-details td { padding: 3px 0; text-align: left; }
+        .payment-details th { border-bottom: 1px dotted #000; text-align: center; font-weight: bold; }
+        .payment-details .amount { text-align: right; font-weight: bold; }
+        .totals-section { text-align: right; margin-top: 10px; font-size: 1em; }
+        .totals-section div { margin-bottom: 3px; }
+        .total-paid { font-size: 1.1em; font-weight: bold; }
+        .company-info p { margin: 2px 0; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div id="ticket-container">
+        <div class="centered">
+            <img class="company-logo" id="empresa_logo" src="" alt="Logo">
+            <div class="company-info">
+                <p id="empresa_nombre"><strong></strong></p>
+                <p><strong>RTN: <span id="empresa_rtn"></span></strong></p>
+                <p id="empresa_direccion"></p>
+                <p>Email: <a id="empresa_email" href=""></a></p>
+                <p>Teléfono: <span id="empresa_telefono"></span></p>
+            </div>
+        </div>
+        
+        <div class="dotted-line"></div>
+
+        <div class="centered">
+            <p class="section-title">RECIBO DE PAGO</p>
+            <p><strong>Folio: <span id="folio"></span></strong></p>
+            <p>Fecha hora: <span id="fecha_hora_general"></span></p>
+        </div>
+
+        <div class="dotted-line"></div>
+        <p><strong>Cliente: <span id="nombre_cliente"></span></strong></p>
+        <div class="dotted-line"></div>
+        <p>Cajero: <strong><span id="nombre_cajero"></span></strong></p>
+        <p>Sucursal: <strong><span id="sucursal"></span></strong></p>
+        <p>Caja: <strong><span id="caja"></span></strong></p>
+        <div class="dotted-line"></div>
+        <p>Observaciones:</p>
+        <p><em id="observacion"></em></p>
+
+        <div class="section-title">Detalles del pago</div>
+        <div class="dotted-line"></div>
+        <table class="payment-details">
+            <thead>
+                <tr>
+                    <th>Medio de pago</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+            <tbody id="detalle_medios_pago_body">
+                </tbody>
+        </table>
+
+        <div class="dotted-line"></div>
+
+        <div class="totals-section">
+            <div>Saldo anterior: L<strong><span id="saldo_anterior"></span></strong></div>
+            <div class="total-paid">Total pagado: L<strong><span id="total_pago"></span></strong></div>
+            <div>Saldo final: L<strong><span id="saldo_final"></span></strong></div>
+            <div>Saldo cliente: L<strong><span id="saldo_cliente"></span></strong></div>
+        </div>
+
+        <div class="dotted-line"></div>
+
+        <div class="centered section-title">
+            ¡Gracias por su pago!
+        </div>
+    </div>
+
+    <script>
+    // --- Lógica del Cliente (FETCH API) ---
+
+    // ⚠️ REEMPLAZA ESTE VALOR con la URL de tu Despliegue de Apps Script (termina en /exec)
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxmOFt5BXZw33rlldtgXhc6ycfkIPT9bd7RfynHFRQgzBhykH1jmQo1gGYi9VwpWz9B/exec'; 
+
+    function initRecibo() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const abonoId = urlParams.get('abonoId'); 
+
+        if (!abonoId) {
+            document.getElementById('ticket-container').innerHTML = '<div class="centered section-title">Error: ID de Abono no proporcionado. Asegúrese de usar ?abonoId=XXX</div>';
+            return;
+        }
+
+        document.getElementById('ticket-container').innerHTML = '<div class="centered section-title">Cargando recibo...</div>';
+        
+        // Llama a la API de Apps Script con el abonoId
+        fetch(`${APPS_SCRIPT_URL}?abonoId=${abonoId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error de red: ${response.statusText}`);
+                }
+                return response.json(); // Espera y parsea el JSON
+            })
+            .then(data => {
+                document.getElementById('ticket-container').innerHTML = ''; 
+                
+                if (data.error) {
+                    // Muestra el error lógico devuelto por Apps Script
+                    document.getElementById('ticket-container').innerHTML = `<div class="centered section-title">Error en API: ${data.error}</div>`;
+                    return;
+                }
+                
+                renderTicket(data);
+                window.print(); 
+            })
+            .catch(error => {
+                // Muestra errores de red o parsing
+                document.getElementById('ticket-container').innerHTML = `<div class="centered section-title">Error crítico al cargar los datos: ${error.message}</div>`;
+            });
+    }
+
+    /**
+     * Rellena los placeholders del HTML con los datos obtenidos.
+     */
+    function renderTicket(data) {
+        // Rellenar información de la empresa 
+        document.getElementById('empresa_logo').src = data.empresa_logo;
+        document.getElementById('empresa_nombre').querySelector('strong').innerText = data.empresa_nombre;
+        document.getElementById('empresa_rtn').innerText = data.empresa_rtn;
+        document.getElementById('empresa_direccion').innerText = data.empresa_direccion;
+        document.getElementById('empresa_telefono').innerText = data.empresa_telefono;
+        document.getElementById('empresa_email').href = `mailto:${data.empresa_email}`;
+        document.getElementById('empresa_email').innerText = data.empresa_email;
+
+        // Rellenar datos generales
+        document.getElementById('ticket-title').innerText = `Recibo de Pago - ${data.folio}`;
+        document.getElementById('folio').innerText = data.folio;
+        document.getElementById('fecha_hora_general').innerText = data.fecha_hora_general;
+        document.getElementById('nombre_cliente').innerText = data.nombre_cliente;
+        document.getElementById('nombre_cajero').innerText = data.nombre_cajero;
+        document.getElementById('sucursal').innerText = data.sucursal;
+        document.getElementById('caja').innerText = data.caja;
+        document.getElementById('observacion').innerText = data.observacion;
+
+        // Rellenar detalle de pagos (bucle)
+        const tableBody = document.getElementById('detalle_medios_pago_body');
+        tableBody.innerHTML = ''; 
+        data.detalle_medios_pago.forEach(item => {
+            const row = tableBody.insertRow();
+            row.insertCell(0).innerText = item.medio_de_pago;
+            const montoCell = row.insertCell(1);
+            montoCell.classList.add('amount');
+            montoCell.innerText = `L${item.monto}`;
+        });
+        
+        // Rellenar totales
+        document.getElementById('saldo_anterior').innerText = data.saldo_anterior;
+        document.getElementById('total_pago').innerText = data.total_pago;
+        document.getElementById('saldo_final').innerText = data.saldo_final;
+        document.getElementById('saldo_cliente').innerText = data.saldo_cliente;
+    }
+
+    // Llama a la función principal para iniciar la carga
+    initRecibo();
+    </script>
+</body>
+</html>
