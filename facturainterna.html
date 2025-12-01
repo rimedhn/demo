@@ -244,8 +244,8 @@
         const productos = data.productos;
 
         // Encabezado empresa (ajusta estos campos según tu sheet)
-        document.getElementById("empresa").textContent = v["Empresa"] || "DEMO";
-        document.getElementById("razon").textContent = v["Razon Social"] || "RIMED DIGITAL";
+        document.getElementById("empresa").textContent = v["Empresa"] || "RIMED DIGITAL";
+        document.getElementById("razon").textContent = v["Razon Social"] || "";
         document.getElementById("rtn").textContent = v["RTN Empresa"] || v["RTN Negocio"] || "01011986001748";
         document.getElementById("direccion").textContent = v["Direccion Empresa"] || v["DireccionEmpresa"] || "LA CEIBA, ATLANTIDA";
         document.getElementById("telefono").textContent = v["Telefono Empresa"] || v["TelefonoEmpresa"] || "+504 9359-3126";
